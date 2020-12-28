@@ -1,9 +1,8 @@
 import React from 'react';
 import { Container, Row, Col , Card , CardBody, Form , FormGroup} from 'reactstrap';
-import './login.css';
-import axios from 'axios';
+import './AddUser.css';
 
-class LoginPage extends React.Component{
+class AddUser extends React.Component{
     constructor(props){
         super(props);
 
@@ -11,23 +10,13 @@ class LoginPage extends React.Component{
             username: '',
             password: '',
             userType: 'admin',
-            error:''
+            mobile : ''
         }
     }
 
     handleSubmit = async event =>{
         event.preventDefault();
-        const user = this.state;
-        const handleLogin = this.props.handleLogin;
-        await axios.post("http://localhost:3030/api/auth/signin",user).then(res => {
-            console.log("Done");
-            localStorage.setItem("access_token",res.data.access_token);
-            localStorage.setItem("id",res.data.user._id);
-            handleLogin(res.data._id,res.data.access_token);
-            
-          }).catch(e=>{
-              this.setState({error:"Invalid Username or Password"});
-          });
+        console.log(this.state);
     }
 
 
@@ -38,7 +27,7 @@ class LoginPage extends React.Component{
 
     render(){
         return(
-            <div className="bg-gradient-primary" >
+            <div className="bg-warning p-0" >
                 <Container>
                     <Row className="justify-content-center">
                         <Col md="6" lg="6" xl="6">
@@ -48,7 +37,7 @@ class LoginPage extends React.Component{
                                         <Col lg="12">
                                             <div className="p-5">
                                                 <div className="text-center">
-                                                    <h4 className="text-dark mb-4">Login</h4>
+                                                    <h4 className="text-dark mb-4">Add New User</h4>
                                                 </div>
                                                 <Form className="user" onSubmit={this.handleSubmit} >
                                                     <FormGroup>
@@ -109,11 +98,21 @@ class LoginPage extends React.Component{
                                                         value={this.state.password}
                                                         required />
                                                     </FormGroup>
-                                                    <button className="btn btn-primary btn-block text-white btn-user" name="sub" type="submit">Login</button>
+                                                    <FormGroup>
+                                                        <label>Mobile No:</label>
+                                                        <input className="form-control form-control-user" 
+                                                        type="tel"
+                                                        placeholder="Mobile Number" 
+                                                        name="mobile" 
+                                                        onChange={this.handleChange}
+                                                        value={this.state.mobile}
+                                                        required />
+                                                    </FormGroup>
+                                                    <button className="btn btn-primary btn-block text-white btn-user" name="sub" type="submit">Add User</button>
                                                     
                                                 </Form>
-                                                <div className="text-center" style={{color:'red'}}>{(this.state.error)?(this.state.error):('')}</div>
-                                                <div className="text-center" style={{color:'green'}}></div>
+                                                <div className="text-center" color='red'></div>
+                                                <div className="text-center" color='green'></div>
                                             </div>
 
                                         </Col>
@@ -128,4 +127,4 @@ class LoginPage extends React.Component{
         }
     };
 
-export default LoginPage;
+export default AddUser;

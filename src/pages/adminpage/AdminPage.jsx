@@ -4,6 +4,7 @@ import AdminHeader from "../../components/admin-header/AdminHeader";
 import NavigationSideBar from '../../components/navigation/Navigation';
 import AddUser from '../../components/add-user/AddUser';
 import  ListUsers from "../../components/list-users/ListUsers";
+import ListProducts from "../../components/list-products/ListProducts";
 import { getAuthHeader, getAuthToken, getUserId } from '../../utils/Authorization';
 import { withRouter } from 'react-router-dom';
 
@@ -18,9 +19,16 @@ class AdminPage extends React.Component{
             password: '',
             userType: 'admin',
             currentPage:"1",
-            user:''
+            user:'',
+            admins:'',
+            farmers:'',
+            buyers:'',
+            products:''
         }
         this.logout = this.logout.bind(this);
+        this.getAdmins = this.getAdmins.bind(this);
+        this.getProducts = this.getProducts.bind(this);
+       
     }
 
     componentDidMount()
@@ -38,11 +46,8 @@ class AdminPage extends React.Component{
                 history.push('/');
               });
 
-              axios.post("http://localhost:3030/api/admin/getAll",{id,userType:"admin"},getAuthHeader(authToken)).then(res => {
-                console.log(res.data);
-              }).catch(e=>{
-                 console.log(e);
-              });
+              this.getAdmins();
+              this.getProducts();
         }
         else
         {
@@ -50,6 +55,42 @@ class AdminPage extends React.Component{
         }
        
     }
+
+    getAdmins()
+    {
+        let authToken = getAuthToken();
+        let id = getUserId();
+        axios.post("http://localhost:3030/api/admin/getAll",{id,userType:"admin"},getAuthHeader(authToken)).then(res => {
+            this.setState({admins:res.data});
+           }).catch(e=>{
+              console.log(e);
+           });
+           axios.post("http://localhost:3030/api/admin/getAll",{id,userType:"farmer"},getAuthHeader(authToken)).then(res => {
+            this.setState({farmers:res.data});
+           }).catch(e=>{
+              console.log(e);
+           });
+           axios.post("http://localhost:3030/api/admin/getAll",{id,userType:"buyer"},getAuthHeader(authToken)).then(res => {
+            this.setState({buyers:res.data});
+           }).catch(e=>{
+              console.log(e);
+           });
+    }
+
+    getProducts()
+    {
+        let authToken = getAuthToken();
+        let id = getUserId();
+        axios.post("http://localhost:3030/api/admin/allProducts",{id},getAuthHeader(authToken)).then(res => {
+            this.setState({products:res.data});
+           
+           }).catch(e=>{
+              console.log(e);
+           });
+    }
+
+
+  
 
     handleMenu = event =>{
         event.preventDefault();
@@ -73,11 +114,15 @@ class AdminPage extends React.Component{
                 <AdminHeader userName={(this.state.user)?this.state.user.username:"Loading"} handleLogout={this.logout}/>
                 {(this.state.currentPage==="1")?
                 (<div className="bg-warning">
-                <AddUser userName="Test" />
-                <ListUsers />
+                <AddUser adminChange={this.getAdmins}/>
+                <ListUsers admins={this.state.admins} farmers={this.state.farmers} buyers={this.state.buyers} adminChange={this.getAdmins}/>
                 </div>)
                 :(this.state.currentPage==="2")?
-                    (<AddProduct/>)
+                (<div className="bg-danger">
+                    <AddProduct productChange={this.getProducts}/>
+                    <ListProducts products={this.state.products} productChange={this.getProducts}/>
+                    </div>
+                        )
                 :null
             }
                  

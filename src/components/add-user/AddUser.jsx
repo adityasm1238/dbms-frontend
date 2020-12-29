@@ -1,6 +1,8 @@
 import React from 'react';
-import { Container, Row, Col , Card , CardBody, Form , FormGroup} from 'reactstrap';
+import { Container, Row, Col , Card , CardBody, Form , FormGroup,Spinner} from 'reactstrap';
+import { getAuthHeader, getAuthToken, getUserId } from '../../utils/Authorization';
 import './AddUser.css';
+import axios from 'axios';
 
 class AddUser extends React.Component{
     constructor(props){
@@ -10,13 +12,45 @@ class AddUser extends React.Component{
             username: '',
             password: '',
             userType: 'admin',
-            mobile : ''
+            contactNumber : '',
+            email :'',
+            id:'',
+            msg:'',
+            isSpinner:false,
+            admin_username:'',
         }
+        this.successfulAdd = this.successfulAdd.bind(this);
+    }
+
+    componentDidMount()
+    {
+        this.setState({id:getUserId(),admin_username:getUserId()});
     }
 
     handleSubmit = async event =>{
         event.preventDefault();
-        console.log(this.state);
+        const data = this.state;
+        console.log(getAuthHeader(getAuthToken()));
+        this.setState({isSpinner:true});
+         axios.post("http://localhost:3030/api/admin/addUser",data,getAuthHeader(getAuthToken())).then(res=>{
+            if(res.status === 200) this.successfulAdd();
+        }).catch(e=>{
+            console.log(e);
+        });
+        
+    }
+
+    successfulAdd()
+    {
+        this.setState({
+            username: '',
+            password: '',
+            contactNumber : '',
+            email :'',
+            msg:'Done',
+            isSpinner:false,
+        });
+        this.props.adminChange();
     }
 
 
@@ -99,20 +133,36 @@ class AddUser extends React.Component{
                                                         required />
                                                     </FormGroup>
                                                     <FormGroup>
+                                                        <label>Email:</label>
+                                                        <input className="form-control form-control-user" 
+                                                        type="email"
+                                                        placeholder="Email" 
+                                                        name="email" 
+                                                        onChange={this.handleChange}
+                                                        value={this.state.email}
+                                                        required />
+                                                    </FormGroup>
+                                                    <FormGroup>
                                                         <label>Mobile No:</label>
                                                         <input className="form-control form-control-user" 
                                                         type="tel"
                                                         placeholder="Mobile Number" 
-                                                        name="mobile" 
+                                                        name="contactNumber" 
                                                         onChange={this.handleChange}
-                                                        value={this.state.mobile}
+                                                        value={this.state.contactNumber}
                                                         required />
                                                     </FormGroup>
                                                     <button className="btn btn-primary btn-block text-white btn-user" name="sub" type="submit">Add User</button>
                                                     
                                                 </Form>
                                                 <div className="text-center" color='red'></div>
-                                                <div className="text-center" color='green'></div>
+                                                <div className="text-center" style={{color:"green"}}>{(this.state.msg)}</div>
+                                            {
+                                                this.state.isSpinner?
+                                                (<div className="text-center mt-1" ><Spinner color="primary" /></div>):null
+                                            }
+                                                
+
                                             </div>
 
                                         </Col>

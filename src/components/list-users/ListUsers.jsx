@@ -1,23 +1,39 @@
-
 import React from 'react';
-import { Container, Row, Col , Button} from 'reactstrap';
+import { Container, Row, Col , Button, Spinner} from 'reactstrap';
 import ListUsersItem from "../list-users-item/ListUsersItem";
-
+import { getAuthHeader, getAuthToken, getUserId } from '../../utils/Authorization';
 import './ListUsers.css';
+import axios from 'axios';
 
 
 class ListUsers extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            displayUsers : "admin"
+            userType : "admin",
+            id : '',
         }
+        this.deleteU = this.deleteU.bind(this);
+
+    }
+
+    deleteU(userId)
+    {
+     
+            let authToken = getAuthToken();
+            let id = getUserId();
+            let type = this.state.userType;
+            axios.post("http://localhost:3030/api/admin/deleteUser",{id,userType:type,userId:userId},getAuthHeader(authToken)).then(res => {
+                this.props.adminChange();
+               }).catch(e=>{
+                  console.log(e);
+               });
 
     }
 
     handleUserChange = event => {
         event.preventDefault();
-        this.setState({displayUsers:event.target.id});
+        this.setState({userType:event.target.id});
     }
 
 
@@ -32,16 +48,39 @@ class ListUsers extends React.Component{
                 <Container className="container-fluid mb-5 ">
                 <Row className="mb-2">
                     <Col>
-                    <Button outline={this.state.displayUsers!=="admin"} onClick={this.handleUserChange} id="admin" className="btn-name" color="danger">Admins</Button>
+                    <Button outline={this.state.userType!=="admin"} onClick={this.handleUserChange} id="admin" className="btn-name" color="danger">Admins</Button>
                     </Col>
                     <Col>
-                    <Button outline={this.state.displayUsers!=="farmer"} onClick={this.handleUserChange} id="farmer" className="btn-name" color="danger">Farmers</Button>
+                    <Button outline={this.state.userType!=="farmer"} onClick={this.handleUserChange} id="farmer" className="btn-name" color="danger">Farmers</Button>
                     </Col>
                     <Col>
-                    <Button outline={this.state.displayUsers!=="buyer"} onClick={this.handleUserChange} id="buyer" className="btn-name" color="danger">Buyers</Button>
+                    <Button outline={this.state.userType!=="buyer"} onClick={this.handleUserChange} id="buyer" className="btn-name" color="danger">Buyers</Button>
                     </Col>
                 </Row>
-                <ListUsersItem />
+                <div>
+                {
+                    this.state.userType==="admin"?
+                        this.props.admins.length?
+                            this.props.admins.map(user=>(
+                                (<ListUsersItem user={user} deleteU={this.deleteU}/>)
+                        ))
+                        :
+                            (<Spinner color="primary"></Spinner>)
+                    :this.state.userType === "farmer"?
+                        this.props.farmers.length?
+                        this.props.farmers.map(user=>(
+                            (<ListUsersItem user={user} deleteU={this.deleteU}/>)
+                        ))
+                        :
+                            (<Spinner color="primary"></Spinner>)  
+                    :   this.props.buyers?
+                        this.props.buyers.map(user=>(
+                            (<ListUsersItem user={user} deleteU={this.deleteU}/>)
+                        ))
+                        :
+                            (<Spinner color="primary"></Spinner>)  
+                }
+                </div>
                 </Container>
             </Container>
         );

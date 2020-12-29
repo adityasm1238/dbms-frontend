@@ -20,10 +20,10 @@ class LoginPage extends React.Component{
         const user = this.state;
         const handleLogin = this.props.handleLogin;
         await axios.post("http://localhost:3030/api/auth/signin",user).then(res => {
-            console.log("Done");
             localStorage.setItem("access_token",res.data.access_token);
             localStorage.setItem("id",res.data.user._id);
-            handleLogin(res.data._id,res.data.access_token);
+            localStorage.setItem("type",user.userType);
+            handleLogin(res.data._id,res.data.access_token,user.userType);
             
           }).catch(e=>{
               this.setState({error:"Invalid Username or Password"});

@@ -8,8 +8,10 @@ import 'bootstrap/dist/js/bootstrap.bundle.min';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './fonts/fontawesome-all.min.css';
 import AdminPage from "./pages/adminpage/AdminPage";
+import FarmerPage from "./pages/farmerpage/FarmerPage";
 import LoginPage from './components/login/login';
-import { getAuthToken, getUserId } from './utils/Authorization';
+import BuyerPage from './pages/buyerpage/BuyerPage';
+import { getAuthToken, getUserId, getUserType } from './utils/Authorization';
 
 
 
@@ -20,7 +22,8 @@ class App extends React.Component{
     super(props);
     this.state = {
       authToken : '',
-      id: ''
+      id: '',
+      type: ''
     };
     this.handleLogin = this.handleLogin.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
@@ -30,11 +33,10 @@ class App extends React.Component{
   componentDidMount()
   {
     let authTokenSaved = getAuthToken();
-  
+    let type = getUserType();
     let idSaved = getUserId();
-    if(authTokenSaved && idSaved){
-       this.setState({id:idSaved,authToken:authTokenSaved});
-      
+    if(authTokenSaved && idSaved && type){
+       this.setState({id:idSaved,authToken:authTokenSaved,type:type});
     }
     else
       localStorage.clear();
@@ -49,20 +51,19 @@ class App extends React.Component{
     });
   }
 
-  handleLogin(id,authToken)
+  handleLogin(id,authToken,type)
   {
-    this.setState({id:id,authToken:authToken});
+    this.setState({id:id,authToken:authToken,type:type});
   }
 
   render(){
     return (
       <Switch>
             <Route exact path = '/' 
-            render={()=>(this.state.authToken && this.state.authToken.length>0)?(<Redirect to='/admin' />):(<LoginPage handleLogin={this.handleLogin}/>)}/>
-            {/* <Route exact path='/admin' render={()=> 
-              this.state.currentUser ? (<AdminPage />):
-              (<Redirect to='/' />) }/> */}
+            render={()=>(this.state.authToken && this.state.authToken.length>0)?(this.state.type==="admin")?(<Redirect to='/admin' />):(this.state.type==="farmer")?(<Redirect to='/farmer' />):(this.state.type==="buyer")?(<Redirect to='/buyer' />):(<LoginPage handleLogin={this.handleLogin}/>):(<LoginPage handleLogin={this.handleLogin}/>)}/>
             <Route exact path = '/admin' render={()=>(<AdminPage handleLogout={this.handleLogout}/>)}/>
+            <Route exact path = '/farmer' render={()=>(<FarmerPage handleLogout={this.handleLogout}/>)}/>
+            <Route exact path = '/buyer' render={()=>(<BuyerPage handleLogout={this.handleLogout}/>)}/>
             
        </Switch>
     );

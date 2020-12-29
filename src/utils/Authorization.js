@@ -22,3 +22,11 @@ exports.getUserId = ()=>
         return user
     return null
 };
+
+exports.getUserType = () =>
+{
+    let user = localStorage.getItem("type");
+    if(user && user.length>0)
+        return user
+    return null
+}

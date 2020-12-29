@@ -1,18 +1,21 @@
 import React from 'react';
 import { Container, Row, Col , Card , CardBody, Form , FormGroup,Spinner} from 'reactstrap';
 import { getUserId ,getAuthHeader,getAuthToken} from '../../utils/Authorization';
-import './AddProduct.css';
+import './AddProductToListing.css';
 import axios from 'axios';
 
-class AddProduct extends React.Component{
+class AddProductToListing extends React.Component{
     constructor(props){
         super(props);
 
         this.state = {
-            productname: '',
             isSpinner:false,
-            msp : '',
-            id:''
+            id:'',
+            productname:'',
+            quantity: '',
+            curMsp:0,
+            minPrice:'',
+            msg:''
         }
     }
 
@@ -20,29 +23,46 @@ class AddProduct extends React.Component{
 
     handleSubmit = async event =>{
         event.preventDefault();
-        const data = this.state;
+        let authToken = getAuthToken();
+        let id = getUserId();
         this.setState({isSpinner:true});
-         axios.post("http://localhost:3030/api/admin/addProduct",data,getAuthHeader(getAuthToken())).then(res=>{
-            if(res.status === 200) this.successfulAdd();
-        }).catch(e=>{
-            console.log(e);
-        });
+        axios.post("http://localhost:3030/api/farmer/addListing",
+        {id:id,
+        product_id:this.state.productname,
+        status:'open',
+        min_price:this.state.minPrice,
+        farmer_id:id,
+        quantity:this.state.quantity},
+        getAuthHeader(authToken)).then(res => {
+            this.setState({isSpinner:false,msg:'Listed Successfully'})
+           }).catch(e=>{
+              console.log(e);
+              this.setState({isSpinner:false});
+           });
     }
     componentDidMount()
     {
         this.setState({id:getUserId()});
+       
     }
 
-    successfulAdd()
-    {
-        this.setState({isSpinner:false});
-        this.props.productChange();
-    }
 
 
     handleChange = event => {
         const {value,name} = event.target;
-        this.setState({[name] : value});
+        this.setState({[name] : value},this.getMsp);
+    }
+   
+    
+
+    getMsp()
+    {
+        let cur = this.state.productname;
+        let msps = this.props.products.filter(value => value._id===cur);
+        if(msps.length>0)
+            this.setState({curMsp:msps[0].msp});
+        else
+            this.setState({curMsp:0});
     }
 
     render(){
@@ -57,36 +77,47 @@ class AddProduct extends React.Component{
                                         <Col lg="12">
                                             <div className="p-5">
                                                 <div className="text-center">
-                                                    <h4 className="text-dark mb-4">Add New Product</h4>
+                                                    <h4 className="text-dark mb-4">List product</h4>
                                                 </div>
                                                 <Form className="user" onSubmit={this.handleSubmit} >
                                                     <FormGroup>
-                                                        <label>Product Name:</label>
+                                                        <label>Select Product:</label>
+                                                        <select className="form-control" name="productname" value={this.state.productname} onChange={this.handleChange}>
+                                                            {
+                                                                this.props.products.map(product => (
+                                                                    <option value={product._id}>{product.productname} at MSP of Rs.{product.msp}</option>
+                                                                ))
+                                                            }
+                                                        </select>
+                                                    </FormGroup>
+                                                    <FormGroup>
+                                                        <label>Quantity :</label>
                                                         <input className="form-control form-control-user" 
-                                                        type="text"  
-                                                        placeholder="Enter Product Name" 
-                                                        name="productname" 
+                                                        type="number"
+                                                        min="0"
+                                                        placeholder="Quantity in Kgs" 
+                                                        name="quantity" 
                                                         onChange={this.handleChange}
-                                                        value={this.state.productname}
+                                                        value={this.state.quantity}
                                                         required />
                                                     </FormGroup>
                                                     <FormGroup>
-                                                        <label>MSP:</label>
+                                                        <label>Minimum Price :</label>
                                                         <input className="form-control form-control-user" 
                                                         type="number"
-                                                        step="0.01"
-                                                        min="0"
-                                                        placeholder="MSP" 
-                                                        name="msp" 
+                                                        min={this.state.curMsp}
+                                                        placeholder="Enter minimum price expected (Greater than or equal to msp)" 
+                                                        name="minPrice" 
                                                         onChange={this.handleChange}
-                                                        value={this.state.msp}
+                                                        value={this.state.minPrice}
                                                         required />
                                                     </FormGroup>
+                                                   
                                                     <button className="btn btn-primary btn-block text-white btn-user" name="sub" type="submit">Add Product</button>
                                                     
                                                 </Form>
                                                 <div className="text-center" color='red'></div>
-                                                <div className="text-center" color='green'></div>
+                                                <div className="text-center" style={{color:"green"}}>{(this.state.msg)}</div>
                                                 {
                                                 this.state.isSpinner?
                                                 (<div className="text-center mt-1" ><Spinner color="primary" /></div>):null
@@ -105,4 +136,4 @@ class AddProduct extends React.Component{
         }
     };
 
-export default AddProduct;
+export default AddProductToListing;

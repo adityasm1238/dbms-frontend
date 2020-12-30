@@ -32,6 +32,8 @@ class FarmerPage extends React.Component{
            });
     }
 
+    
+
     componentDidMount()
     {
         const {history} = this.props;

@@ -18,6 +18,7 @@ class BidProduct extends React.Component{
         }
 
         this.getListings = this.getListings.bind(this);
+        this.clearListing = this.clearListing.bind(this);
     }
 
 
@@ -33,6 +34,11 @@ class BidProduct extends React.Component{
             this.getListings();
         }
         
+    }
+
+    clearListing()
+    {
+        this.setState({listings:[],msg:"Bid Placed"})
     }
 
     getListings(){
@@ -125,7 +131,7 @@ class BidProduct extends React.Component{
                                 {
                                     this.state.listings.length>0?
                                 this.state.listings.map(listing=>(
-                                    <BidListingItem user={listing} products={this.props.products} bidsChanged={this.props.bidsChanged}/>
+                                    <BidListingItem user={listing} clearListing={this.clearListing} products={this.props.products} bidsChanged={this.props.bidsChanged}/>
                                 ))
                                 :
                                             (<div className="text-center"><Spinner color="primary"></Spinner></div>)  

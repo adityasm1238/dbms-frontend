@@ -36,7 +36,9 @@ class AddProductToListing extends React.Component{
         getAuthHeader(authToken)).then(res => {
             this.setState({isSpinner:false,msg:'Listed Successfully'})
            }).catch(e=>{
-              console.log(e);
+              
+              console.log(e.response);
+
               this.setState({isSpinner:false});
            });
     }
@@ -85,7 +87,7 @@ class AddProductToListing extends React.Component{
                                                         <select className="form-control" name="productname" value={this.state.productname} onChange={this.handleChange}>
                                                             {
                                                                 this.props.products.map(product => (
-                                                                    <option value={product._id}>{product.productname} at MSP of Rs.{product.msp}</option>
+                                                                    <option value={product._id} key={product._id}>{product.productname} at MSP of Rs.{product.msp}</option>
                                                                 ))
                                                             }
                                                         </select>

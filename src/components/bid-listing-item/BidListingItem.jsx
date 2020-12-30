@@ -2,6 +2,7 @@
 import React from 'react';
 import { Row,Col,Card, CardHeader , CardBody,Form,FormGroup} from 'reactstrap';
 import { getAuthHeader, getAuthToken, getUserId } from '../../utils/Authorization';
+import { withRouter } from 'react-router-dom';
 
 import axios from 'axios';
 
@@ -25,6 +26,7 @@ class BidListingItem extends React.Component{
         let id = getUserId();
         axios.post("http://localhost:3030/api/buyer/addBid",{id,bid_amount:this.state.bidAmount,status:"waiting",buyer_id:id,prod_listing_id:this.props.user._id},getAuthHeader(authToken)).then(res => {
             this.props.bidsChanged();
+            this.props.clearListing();
             }).catch(e=>{
                 console.log(e);
             });
@@ -74,6 +76,7 @@ class BidListingItem extends React.Component{
                                 <Col>
                                 <button className="btn btn-success btn-block text-white btn-user" name="sub" type="submit">Place Bid</button>
                                 </Col>
+                                
                             </Row>
                             
                             
@@ -85,4 +88,4 @@ class BidListingItem extends React.Component{
     }
 };
 
-export default BidListingItem;
+export default withRouter(BidListingItem);

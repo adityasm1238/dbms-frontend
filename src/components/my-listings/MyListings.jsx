@@ -10,10 +10,12 @@ class MyListing extends React.Component{
         super(props);
         this.state = {
             id : '',
-            listings:[]
+            listings:[],
+            myBids:[]
         }
 
         this.getMyListings = this.getMyListings.bind(this);
+        this.getBids = this.getBids.bind(this);
        
     }
 
@@ -21,6 +23,7 @@ class MyListing extends React.Component{
     componentDidMount()
     {
         this.getMyListings();
+        this.getBids();
     }
 
     getMyListings()
@@ -32,6 +35,20 @@ class MyListing extends React.Component{
             }).catch(e=>{
                 console.log(e);
             });
+    }
+    getBids()
+    {
+        
+        let authToken = getAuthToken();
+        let id = getUserId();
+        axios.post("http://localhost:3030/api/farmer/getBids",{id},getAuthHeader(authToken)).then(res => {
+            console.log(res.data);
+            this.setState({myBids:res.data},()=>{console.log(this.state.myBids);});
+            
+            
+           }).catch(e=>{
+              console.log(e);
+           });
     }
 
 
@@ -48,7 +65,7 @@ class MyListing extends React.Component{
                 {
                     this.state.listings.length>0?
                    this.state.listings.map(listing=>(
-                    <MyListingItem user={listing} products={this.props.products} listingChanged={this.getMyListings}/>
+                    <MyListingItem key={listing._id} user={listing} products={this.props.products} myBids={this.state.myBids} bidsChanged={this.getBids} listingChanged={this.getMyListings}/>
                    ))
                    :
                             (<div className="text-center"><Spinner color="primary"></Spinner></div>)  
